@@ -1,17 +1,236 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Recipes</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="primary" (click)="openAddModal()">
+        <ion-icon name="add-circle-outline" slot="icon-only" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+<ion-content [fullscreen]="true" class="recipes">
+  <div class="filters">
+    <div class="search-row">
+      <ion-searchbar
+        class="compact-search"
+        placeholder="Search recipes, tags, or ingredients"
+        [value]="searchTerm"
+        (ionInput)="onSearchChange($event)"
+        [debounce]="200">
+      </ion-searchbar>
+      <ion-button id="extraFiltersBtn" size="small" fill="outline" color="medium" class="extra-button">
+        <ion-icon name="options-outline" slot="icon-only" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </div>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+    <ion-segment [value]="selectedCategory" (ionChange)="onCategoryChange($event)" scrollable="true">
+      <ion-segment-button *ngFor="let category of categories" [value]="category.id">
+        <ion-label>{{ category.label }}</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+    <div class="active-extras" *ngIf="activeExtras.length">
+      <ion-chip *ngFor="let extra of activeExtras">
+        <ion-label>{{ extra | titlecase }}</ion-label>
+      </ion-chip>
+    </div>
+
+    <ion-popover trigger="extraFiltersBtn" alignment="center" side="bottom">
+      <ng-template>
+        <ion-list>
+          <ion-list-header>Filter by diet & cuisine</ion-list-header>
+          <ion-item *ngFor="let option of extraFilters">
+            <ion-checkbox
+              slot="start"
+              [checked]="isExtraActive(option.id)"
+              (ionChange)="onExtraToggle(option.id, $any($event).detail.checked)">
+            </ion-checkbox>
+            <ion-label>{{ option.label }}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ng-template>
+    </ion-popover>
+  </div>
+
+  <ion-grid class="cards">
+    <ion-row>
+      <ion-col size="12" sizeMd="6" *ngFor="let recipe of filteredRecipes">
+        <ion-card class="recipe-card" (click)="openRecipe(recipe)">
+          <ion-img [src]="recipe.image" [alt]="recipe.title"></ion-img>
+          <ion-card-header>
+            <ion-card-title>{{ recipe.title }}</ion-card-title>
+            <ion-card-subtitle>
+              {{ primaryCategory(recipe) | titlecase }} • {{ recipe.duration }} • {{ recipe.difficulty }}
+            </ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <p class="description">{{ recipe.description }}</p>
+            <div class="meta">
+              <ion-chip color="primary" fill="outline" *ngFor="let tag of recipe.tags">
+                <ion-label>{{ tag }}</ion-label>
+              </ion-chip>
+            </div>
+
+            <div class="card-actions">
+              <ion-button size="small" fill="clear" color="primary" (click)="startEdit(recipe); $event.stopPropagation();">
+                <ion-icon name="create-outline" slot="start" aria-hidden="true"></ion-icon>
+                Edit
+              </ion-button>
+              <ion-button size="small" fill="clear" color="danger" (click)="confirmDelete(recipe); $event.stopPropagation();">
+                <ion-icon name="trash-outline" slot="start" aria-hidden="true"></ion-icon>
+                Delete
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="openAddModal()">
+      <ion-icon name="add" aria-hidden="true"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-modal [isOpen]="isFormOpen" (didDismiss)="closeFormModal()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ formMode === 'add' ? 'Add Recipe' : 'Edit Recipe' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="medium" (click)="closeFormModal()">
+              <ion-icon name="close" slot="icon-only" aria-hidden="true"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="add-modal">
+        <ion-list *ngIf="formErrors.length" lines="none">
+          <ion-item color="danger">
+            <ion-label>
+              <strong>Please fix:</strong>
+              <ul>
+                <li *ngFor="let err of formErrors">{{ err }}</li>
+              </ul>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-list lines="full">
+          <ion-item>
+            <ion-label position="stacked">Title</ion-label>
+            <ion-input [(ngModel)]="formModel.title" placeholder="Grandma's Lasagna"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Description</ion-label>
+            <ion-textarea autoGrow="true" [(ngModel)]="formModel.description" placeholder="Quick note about the recipe..."></ion-textarea>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Image URL</ion-label>
+            <ion-input [(ngModel)]="formModel.image" placeholder="https://..."></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Upload Image</ion-label>
+            <input type="file" accept="image/*" (change)="onImageFileChange($event)" />
+          </ion-item>
+          <ion-item *ngIf="previewImage || formModel.image">
+            <ion-label>Preview</ion-label>
+            <ion-img class="preview" [src]="previewImage || formModel.image"></ion-img>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Categories (select one or more)</ion-label>
+            <ion-select interface="popover" [(ngModel)]="formModel.categories" multiple="true">
+              <ion-select-option *ngFor="let category of categories" [value]="category.id">{{ category.label }}</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Duration</ion-label>
+            <ion-input [(ngModel)]="formModel.duration" placeholder="30 mins"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Difficulty</ion-label>
+            <ion-select interface="popover" [(ngModel)]="formModel.difficulty">
+              <ion-select-option value="Easy">Easy</ion-select-option>
+              <ion-select-option value="Medium">Medium</ion-select-option>
+              <ion-select-option value="Hard">Hard</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Diet</ion-label>
+            <ion-select interface="popover" [(ngModel)]="formModel.diet">
+              <ion-select-option value="vegetarian">Vegetarian</ion-select-option>
+              <ion-select-option value="non-vegetarian">Non-vegetarian</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Cuisine</ion-label>
+            <ion-select interface="popover" [(ngModel)]="formModel.cuisine">
+              <ion-select-option value="indian">Indian</ion-select-option>
+              <ion-select-option value="italian">Italian</ion-select-option>
+              <ion-select-option value="asian">Asian</ion-select-option>
+              <ion-select-option value="american">American</ion-select-option>
+              <ion-select-option value="mexican">Mexican</ion-select-option>
+            </ion-select>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Tags (comma separated)</ion-label>
+            <ion-input [(ngModel)]="formModel.tags" placeholder="Quick, Family, Weeknight"></ion-input>
+          </ion-item>
+          <ion-item>
+            <ion-label position="stacked">Steps (one per line)</ion-label>
+            <ion-textarea autoGrow="true" [(ngModel)]="formModel.steps" placeholder="Step 1&#10;Step 2&#10;Step 3"></ion-textarea>
+          </ion-item>
+        </ion-list>
+
+        <div class="add-actions">
+          <ion-button expand="block" color="primary" (click)="submitForm()">
+            {{ formMode === 'add' ? 'Save Recipe' : 'Update Recipe' }}
+          </ion-button>
+          <ion-button expand="block" fill="clear" color="medium" (click)="closeFormModal()">Cancel</ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <ion-modal [isOpen]="detailOpen" (didDismiss)="closeRecipe()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ activeRecipe?.title }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="medium" (click)="closeRecipe()">
+              <ion-icon name="close" slot="icon-only" aria-hidden="true"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="detail-modal">
+        <ion-img *ngIf="activeRecipe?.image" [src]="activeRecipe?.image" [alt]="activeRecipe?.title"></ion-img>
+        <div class="detail-body">
+          <p class="meta-line">
+            <strong>{{ primaryCategory(activeRecipe) | titlecase }}</strong> •
+            {{ activeRecipe?.duration }} •
+            {{ activeRecipe?.difficulty }} •
+            {{ activeRecipe?.diet | titlecase }} •
+            {{ activeRecipe?.cuisine | titlecase }}
+          </p>
+          <p class="description">{{ activeRecipe?.description }}</p>
+          <div class="meta">
+            <ion-chip color="primary" fill="outline" *ngFor="let tag of activeRecipe?.tags">
+              <ion-label>{{ tag }}</ion-label>
+            </ion-chip>
+          </div>
+          <div class="steps">
+            <h3>Steps</h3>
+            <ol>
+              <li *ngFor="let step of activeRecipe?.steps">{{ step }}</li>
+              <li *ngIf="!activeRecipe?.steps || (activeRecipe?.steps?.length ?? 0) === 0">Steps not provided yet.</li>
+            </ol>
+          </div>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
 </ion-content>

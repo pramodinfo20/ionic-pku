@@ -1,0 +1,168 @@
+ion-content.recipes {
+  --background: #f8f9fb;
+}
+
+.filters {
+  padding: 12px 12px 4px;
+  display: grid;
+  gap: 10px;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+ion-searchbar.compact-search {
+  --background: #ffffff;
+  --box-shadow: 0 10px 24px rgba(12, 22, 44, 0.08);
+  border-radius: 14px;
+  max-width: 100%;
+  min-width: 0;
+}
+
+ion-segment {
+  --background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(12, 22, 44, 0.08);
+}
+
+ion-segment-button {
+  min-width: 100px;
+}
+
+.active-extras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 4px;
+}
+
+.cards {
+  padding: 10px 12px 90px;
+}
+
+.recipe-card {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 18px 32px rgba(15, 19, 34, 0.12);
+  background: #ffffff;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  cursor: pointer;
+}
+
+.recipe-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 40px rgba(15, 19, 34, 0.14);
+}
+
+.recipe-card ion-img {
+  height: 180px;
+  object-fit: cover;
+}
+
+.recipe-card ion-card-header {
+  padding-bottom: 6px;
+}
+
+.recipe-card ion-card-title {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.recipe-card ion-card-subtitle {
+  color: #556078;
+}
+
+.description {
+  margin: 0 0 12px;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+ion-fab-button {
+  box-shadow: 0 12px 24px rgba(56, 128, 255, 0.35);
+}
+
+.add-modal ion-content {
+  --padding-start: 0;
+  --padding-end: 0;
+}
+
+.add-actions {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.add-modal .preview {
+  max-height: 160px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.extra-button {
+  --padding-start: 8px;
+  --padding-end: 8px;
+  height: 42px;
+  width: 42px;
+  margin: 0;
+}
+
+.detail-modal ion-img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.detail-body {
+  padding: 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.detail-body .meta-line {
+  margin: 0;
+  color: #4b5563;
+}
+
+.detail-body .description {
+  margin: 0;
+  color: #111827;
+  line-height: 1.5;
+}
+
+.detail-body .steps h3 {
+  margin: 0 0 8px;
+}
+
+.detail-body .steps ol {
+  margin: 0;
+  padding-left: 18px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  ion-searchbar {
+    --box-shadow: 0 6px 16px rgba(12, 22, 44, 0.08);
+  }
+
+  .recipe-card ion-img {
+    height: 160px;
+  }
+}

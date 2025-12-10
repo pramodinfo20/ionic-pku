@@ -1,0 +1,91 @@
+ion-content.home {
+  --background: radial-gradient(circle at 20% 20%, #f7f9ff 0, #eef2ff 30%, #f7f9ff 60%), #ffffff;
+}
+
+.hero {
+  padding: 32px 24px 8px;
+  text-align: left;
+  color: #1a1b1f;
+}
+
+.hero .eyebrow {
+  margin: 0 0 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #6a6f85;
+}
+
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #0f1322;
+}
+
+.hero .lede {
+  margin: 0;
+  color: #4c5165;
+  line-height: 1.4;
+}
+
+.menu-grid {
+  padding: 8px 16px 32px;
+}
+
+.menu-card {
+  border-radius: 16px;
+  box-shadow: 0 18px 30px rgba(15, 19, 34, 0.08);
+  background: linear-gradient(135deg, #ffffff, #f6f8ff);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 40px rgba(15, 19, 34, 0.12);
+}
+
+.card-content {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+}
+
+.menu-icon {
+  font-size: 32px;
+  color: var(--ion-color-primary);
+  background: rgba(56, 128, 255, 0.08);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.text h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.text p {
+  margin: 0;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.chevron {
+  font-size: 22px;
+  color: #9ca3af;
+}
+
+@media (max-width: 480px) {
+  .menu-card {
+    border-radius: 14px;
+  }
+
+  .card-content {
+    grid-template-columns: 50px 1fr auto;
+    gap: 12px;
+  }
+}
